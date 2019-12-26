@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hypermarket.goods.Dao.GoodsMapper">
+
+	<select id="getList" resultType="hypermarket.goods.bean.Goods">
+		<bind name="gn" value="'%'+g_name+'%'" />
+		select g.id,g.g_name,g.price,g.inco,g.num,g.status,
+		u.real_name, t.type_name
+		from goods g , backuser u,types t
+		<where>
+			u.id=g.user_id and t.id = g.type_id
+			<if test="typeIds!=null and typeIds.length>0">
+				and type_id in
+				<foreach collection="typeIds" item="item" open="(" close=")"
+					separator=",">
+					#{item}
+				</foreach>
+			</if>
+			<if test="g_name!=null">
+				and g.g_name like #{gn}
+			</if>
+		</where>
+		<if test="status!=null">
+			order by g.status ASC
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!-- 查一定要写resultType或者resultMap -->
+	<select id="getCount" resultType="_int">
+		<bind name="gn" value="'%'+g_name+'%'" />
+		select count(1) from goods
+		<where>
+			<if test="typeIds!=null and typeIds.length>0">
+				type_id in
+				<foreach collection="typeIds" item="item" open="(" close=")"
+					separator=",">
+					#{item}
+				</foreach>
+			</if>
+			<if test="g_name!=null and g_name!=''">
+				and g_name like #{gn}
+			</if>
+		</where>
+	</select>
+	<delete id="deleteById">
+		delete from goods where id=#{id}
+	</delete>
+	<!-- 根据分类的id查询本条记录 -->
+
+	<select id="getById" resultType="hypermarket.goods.bean.Goods">
+		select * from goods where id=#{id}
+	</select>
+	<!-- 修改商品详情 -->
+	<update id="updateById">
+		update goods
+		<set>
+			<if test="user_id!=null">user_id=#{user_id},</if>
+			<if test="type_id!=null">type_id=#{type_id},</if>
+			<if test="g_name!=null">g_name=#{g_name},</if>
+			<if test="price!=null">price=#{price},</if>
+			<if test="inco!=null">inco=#{inco},</if>
+			<if test="content!=null">content=#{content},</if>
+			<if test="num!=null">num=#{num}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- // 添加商品 -->
+	<insert id="saveGoods">
+		insert into goods
+		values(default,#{user_id},#{type_id},#{g_name},#{price},#{inco},#{content},#{num},#{create_time},default)
+	</insert>
+	<!-- // 商品上下架 -->
+
+	<update id="updateStatus">update goods set status=#{status} where id=#{id}
+	</update>
+</mapper>

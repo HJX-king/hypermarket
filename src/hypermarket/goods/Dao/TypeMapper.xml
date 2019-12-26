@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hypermarket.goods.Dao.TypeMapper">
+	<select id="getListAll"
+		resultType="hypermarket.goods.bean.TypeBean">
+		select id,type_name from types
+	</select>
+	
+<!-- <resultMap type="hypermarket.goods.bean.TypeBean" id="typeb">
+  	<id column="id" property="id" />
+  	<result column="type_name" property="type_name"/>
+  	<result column="content" property="content"/>
+  	<result column="create_time" property="create_time"/>
+  	<association property="user" javaType="hypermarket.user.bean.Users">
+  		<id column="id" property="id"/>
+  		<result column="real_name" property="real_name"/>
+  	</association>
+  </resultMap> -->
+
+	 <select id="getList" resultType="hypermarket.goods.bean.TypeBean">
+		<bind name="tn" value="'%'+type_name+'%'" />
+		select t.id,t.type_name,t.content,t.create_time,
+		u.real_name from types t,backuser u where
+		u.id=t.user_id and type_name like #{tn} limit #{start},#{pageSize}
+	</select>
+	
+	 <select id="getCount" resultType="_int">
+	<bind name="tn" value="'%'+type_name+'%'"/>
+	 select count(1) from types t,backuser u where u.id=t.user_id <if test="type_name!=null">and type_name like #{tn}</if>
+	</select>
+	<delete id="deleteById">delete from types where id=#{id}</delete>
+	<select id="getById" resultType="hypermarket.goods.bean.TypeBean">select * from types where id=#{id}</select> 
+	<update id="updateById">
+	update types set user_id=#{user_id}, type_name=#{type_name}, content=#{content} where id=#{id}
+	</update>
+	<insert id="saveType">
+	insert into types values(default,#{user_id},#{type_name},#{content},#{create_time})
+	</insert>
+</mapper>
